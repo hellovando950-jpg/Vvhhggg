@@ -1,0 +1,6 @@
+{
+  "name": "Deriv Trader",
+  "description": "Full-featured Deriv WebSocket trading terminal featuring rise/fall, over/under, matches/differs, accumulators, and Asian contracts with real-time ticks streaming.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
