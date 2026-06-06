@@ -258,14 +258,8 @@ class TradingViewModel(application: Application) : AndroidViewModel(application)
             .connectTimeout(10, TimeUnit.SECONDS)
             .build()
 
-        val token = _apiToken.value
         val request = Request.Builder()
             .url(serverUrl)
-            .apply {
-                if (token.isNotEmpty()) {
-                    addHeader("Authorization", "Bearer $token")
-                }
-            }
             .build()
 
         webSocket = okHttpClient?.newWebSocket(request, object : WebSocketListener() {
@@ -274,10 +268,11 @@ class TradingViewModel(application: Application) : AndroidViewModel(application)
                 _connectionState.value = ConnectionState.CONNECTED
                 triggerFeedback("Connected to Deriv Trading Network.")
 
+                val activeToken = _apiToken.value
                 // Send Authorize if token is available
-                if (token.isNotEmpty()) {
+                if (activeToken.isNotEmpty()) {
                     Log.d("TradingViewModel", "Attempting authorization...")
-                    sendAuthorize(token)
+                    sendAuthorize(activeToken)
                 } else {
                     _isAuthorized.value = false
                     _authError.value = "Missing API Token. Enter your token to trade!"
@@ -441,10 +436,6 @@ class TradingViewModel(application: Application) : AndroidViewModel(application)
     private fun sendJson(json: JSONObject) {
         val socket = webSocket
         if (socket != null && _connectionState.value == ConnectionState.CONNECTED) {
-            val token = _apiToken.value
-            if (token.isNotEmpty()) {
-                json.put("bearer_token", "Bearer $token")
-            }
             socket.send(json.toString())
         } else {
             Log.e("TradingViewModel", "Cannot send message. WS is not connected.")

@@ -47,16 +47,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    contentWindowInsets = WindowInsets.safeDrawing
-                ) { innerPadding ->
-                    TradingDashboardScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                    )
-                }
+                TradingDashboardScreen(
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }
@@ -130,22 +123,32 @@ fun TradingDashboardScreen(
 
     var showSettings by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
         viewModel.feedbackMessage.collect { msg ->
-            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
+            snackbarHostState.showSnackbar(
+                message = msg,
+                duration = SnackbarDuration.Short
+            )
         }
     }
 
-    Surface(
+    Scaffold(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        contentWindowInsets = WindowInsets.safeDrawing
+    ) { innerPadding ->
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
             // Header Bar
             HeaderBar(
                 connectionState = connectionState,
@@ -350,6 +353,7 @@ fun TradingDashboardScreen(
             )
         }
     }
+}
 }
 
 @Composable
